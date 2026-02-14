@@ -3,121 +3,242 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kiwi Eyebrow Intelligence</title>
+    <title>KIWI 眉毛事業部 | 経営コンソール</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap');
         body { font-family: 'Noto Sans JP', sans-serif; }
-        .bg-most { background-color: #8B4513; }
-        .bg-ssin { background-color: #1E40AF; }
-        .bg-lumiss { background-color: #64748b; }
-        .text-most { color: #8B4513; }
-        .text-ssin { color: #1E40AF; }
+        
+        .bg-most { background-color: #5d4037; } 
+        .bg-ssin { background-color: #1e3a8a; } 
+        .bg-lumiss { background: linear-gradient(135deg, #e2e8f0 0%, #94a3b8 100%); } 
+        
+        .text-most { color: #5d4037; }
+        .text-ssin { color: #1e3a8a; }
         .text-lumiss { color: #475569; }
+        
+        .border-most { border-color: #5d4037; }
+        .border-ssin { border-color: #1e3a8a; }
+        .border-lumiss { border-color: #94a3b8; }
+
         .card-shadow { box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); }
+        .filter-btn.active { @apply bg-white shadow-md text-blue-600 ring-2 ring-blue-500/20; }
+        
+        .loading-overlay {
+            display: flex; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255,255,255,0.95); z-index: 1000;
+            justify-content: center; align-items: center; flex-direction: column;
+        }
+        .logo-container img { max-height: 48px; width: auto; object-fit: contain; }
+        .fade-in { animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .sv-filter-btn.active { @apply bg-white shadow-md text-blue-600 ring-2 ring-blue-500/20; }
+        .diff-pos { color: #10b981; font-weight: 800; } /* 正の差分: 緑 */
+        .diff-neg { color: #ef4444; font-weight: 800; } /* 負の差分: 赤 */
     </style>
 </head>
-<body class="bg-gray-50 text-slate-900 pb-12">
+<body class="bg-slate-50 text-slate-900 pb-20">
 
-    <div class="max-w-7xl mx-auto p-6">
-        <header class="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 gap-6 border-b-2 border-slate-900 pb-6">
-            <div>
-                <p class="text-xs font-black tracking-[0.3em] text-slate-400 uppercase">株式会社Kiwi 眉毛事業部</p>
-                <h1 class="text-4xl font-black italic tracking-tighter text-slate-900 mt-1 uppercase">Kiwi Eyebrow Dept.</h1>
-                <p class="text-sm font-bold text-slate-500 mt-2">事業部全店分析・着地予測ダッシュボード</p>
-            </div>
-            <div class="flex flex-col items-end gap-2">
-                <div id="date-display" class="text-right">
-                    <span id="ym" class="text-2xl font-black italic mr-2">----月</span>
-                    <span id="today" class="text-5xl font-black text-blue-600">--</span><span class="text-sm font-bold">日</span>
+    <div id="loader" class="loading-overlay">
+        <div class="animate-spin text-5xl text-blue-600 mb-4"><i class="fas fa-circle-notch"></i></div>
+        <p class="font-black text-slate-500 tracking-widest uppercase text-xs">データを同期中...</p>
+    </div>
+
+    <div class="max-w-7xl mx-auto p-4 md:p-6">
+        <!-- ヘッダー -->
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-6 border-b-2 border-slate-900 pb-6">
+            <div class="flex items-center gap-4">
+                <div class="logo-container bg-white p-2 rounded-xl shadow-sm border border-slate-100">
+                    <img id="main-logo" src="https://ui-avatars.com/api/?name=Kiwi&background=0D8ABC&color=fff" alt="Logo">
                 </div>
-                <div id="remaining" class="text-xs font-bold bg-slate-900 text-white px-4 py-1 rounded-full"></div>
+                <div>
+                    <p class="text-[10px] font-black tracking-[0.3em] text-slate-400 uppercase leading-none mb-1 text-center md:text-left">株式会社Kiwi 眉毛事業部</p>
+                    <h1 class="text-3xl md:text-4xl font-black italic tracking-tighter text-slate-900 uppercase leading-none">KIWI 眉毛事業部</h1>
+                    <p class="text-[10px] font-bold text-slate-500 mt-2 uppercase tracking-widest italic tracking-tighter">Business Intelligence Console | 事業部全店分析・着地予測</p>
+                </div>
+            </div>
+            <div class="flex flex-col items-end gap-2 bg-white px-6 py-3 rounded-2xl shadow-sm border border-slate-100">
+                <div id="date-display" class="text-right">
+                    <span id="ym" class="text-xl font-black italic text-slate-400 mr-2">----月</span>
+                    <span id="today" class="text-5xl font-black text-blue-600 tracking-tighter">--</span><span class="text-sm font-bold ml-1 text-slate-500">日</span>
+                </div>
+                <div id="remaining" class="text-[10px] font-black bg-slate-900 text-white px-4 py-1.5 rounded-full italic uppercase tracking-widest">取得中...</div>
             </div>
         </header>
 
-        <div id="summary-section" class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
+        <!-- メイン集計サマリー -->
+        <div id="summary-section" class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             <div class="md:col-span-2 bg-white p-8 rounded-[2.5rem] card-shadow border border-slate-100 flex flex-col justify-center items-center relative overflow-hidden">
-                <p id="summary-title" class="text-xs font-black tracking-widest text-slate-400 uppercase mb-2">進捗着地見込</p>
-                <div id="overall-rate" class="text-8xl font-black italic text-slate-900">--%</div>
-                <div id="overall-val" class="text-xs font-bold text-slate-400 mt-2 italic">目標: -- / 実績: --</div>
+                <p id="summary-title" class="text-[10px] font-black tracking-[0.2em] text-slate-400 uppercase mb-2 text-center">事業部全体 進捗着地見込</p>
+                <div id="overall-rate" class="text-8xl font-black italic text-slate-900 tracking-tighter">--%</div>
+                <div id="overall-val" class="text-[11px] font-bold text-slate-400 mt-3 flex gap-4 text-center">データを同期しています...</div>
+                <div class="absolute -right-6 -bottom-6 text-slate-100 opacity-20 text-9xl font-black italic pointer-events-none uppercase">KIWI</div>
             </div>
             <div class="grid grid-cols-2 md:grid-cols-1 gap-4 md:col-span-2">
-                <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center text-xl"><i class="fas fa-users"></i></div>
-                    <div><p class="text-[10px] font-bold text-slate-400 uppercase">新規数見込</p><p id="sum-new" class="text-xl font-black tracking-tighter">--%</p></div>
+                <div class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm flex items-center gap-5">
+                    <div class="w-12 h-12 rounded-2xl bg-orange-50 text-orange-500 flex items-center justify-center text-xl shadow-inner"><i class="fas fa-users"></i></div>
+                    <div class="flex-1 overflow-hidden">
+                        <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">新規客数 着地見込</p>
+                        <div class="flex items-baseline justify-between">
+                            <p id="sum-new-rate" class="text-xl font-black tracking-tighter leading-none">--%</p>
+                            <p id="sum-new-val" class="text-[9px] font-bold text-slate-400 tracking-tighter truncate">実績: -- / 目標: --</p>
+                        </div>
+                    </div>
                 </div>
-                <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xl"><i class="fas fa-redo"></i></div>
-                    <div><p class="text-[10px] font-bold text-slate-400 uppercase">再来数見込</p><p id="sum-rep" class="text-xl font-black tracking-tighter">--%</p></div>
+                <div class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm flex items-center gap-5">
+                    <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-500 flex items-center justify-center text-xl shadow-inner"><i class="fas fa-redo"></i></div>
+                    <div class="flex-1 overflow-hidden">
+                        <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">再来客数 着地見込</p>
+                        <div class="flex items-baseline justify-between">
+                            <p id="sum-rep-rate" class="text-xl font-black tracking-tighter leading-none">--%</p>
+                            <p id="sum-rep-val" class="text-[9px] font-bold text-slate-400 tracking-tighter truncate">実績: -- / 目標: --</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="flex flex-wrap gap-4 mb-8 items-center bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
-            <div class="flex gap-2 p-1 bg-gray-100 rounded-xl">
-                <button onclick="updateFilter('all')" class="filter-btn px-6 py-2 rounded-lg text-xs font-black transition-all active bg-white shadow-sm text-blue-600">全て</button>
-                <button onclick="updateFilter('直営')" class="filter-btn px-6 py-2 rounded-lg text-xs font-black transition-all text-slate-500">直営</button>
-                <button onclick="updateFilter('加盟')" class="filter-btn px-6 py-2 rounded-lg text-xs font-black transition-all text-slate-500">加盟</button>
+        <!-- コントロール -->
+        <div class="flex flex-wrap gap-4 mb-4 items-center bg-white p-4 rounded-3xl shadow-sm border border-slate-100">
+            <div class="flex gap-2 p-1 bg-slate-100 rounded-2xl">
+                <button onclick="updateTypeFilter('all')" class="type-filter-btn px-6 py-2 rounded-xl text-xs font-black uppercase transition-all active bg-white shadow-sm text-blue-600">全て</button>
+                <button onclick="updateTypeFilter('直営')" class="type-filter-btn px-6 py-2 rounded-xl text-xs font-black uppercase transition-all text-slate-500">直営</button>
+                <button onclick="updateTypeFilter('加盟')" class="type-filter-btn px-6 py-2 rounded-xl text-xs font-black uppercase transition-all text-slate-500">加盟</button>
             </div>
-            <select id="brand-select" onchange="apply()" class="bg-gray-100 px-4 py-2 rounded-xl text-xs font-black outline-none border-none">
+            <select id="brand-select" onchange="apply()" class="bg-slate-100 px-5 py-2.5 rounded-2xl text-xs font-black outline-none border-none text-slate-700 cursor-pointer hover:bg-slate-200">
                 <option value="all">全ブランド</option>
                 <option value="m">most eyes (m)</option>
                 <option value="S">SSIN STUDIO (S)</option>
                 <option value="L">LUMISS (L)</option>
             </select>
-            <select id="sort-select" onchange="apply()" class="bg-gray-100 px-4 py-2 rounded-xl text-xs font-black outline-none border-none ml-auto">
+            <select id="sort-select" onchange="apply()" class="bg-slate-100 px-5 py-2.5 rounded-2xl text-xs font-black outline-none border-none ml-auto text-slate-700 cursor-pointer hover:bg-slate-200">
                 <option value="default">標準順</option>
                 <option value="rate-desc">達成率が高い順</option>
                 <option value="rate-asc">達成率が低い順</option>
-                <option value="unit-desc">客単価が高い順</option>
             </select>
         </div>
 
+        <!-- SVフィルタボタン -->
+        <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-100 mb-8 overflow-hidden">
+            <p class="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3 ml-2 italic leading-none">SV担当別フィルタ・売上分析</p>
+            <div id="sv-buttons" class="flex flex-wrap gap-2">
+                <button onclick="updateSvFilter('all')" class="sv-filter-btn px-5 py-2 rounded-xl text-xs font-black transition-all active bg-white shadow-sm text-blue-600">全店舗</button>
+            </div>
+        </div>
+
+        <!-- バナーエリア -->
+        <div id="brand-banner-container" class="hidden mb-10 fade-in">
+            <div class="w-full bg-white rounded-[2.5rem] card-shadow overflow-hidden border border-slate-100">
+                <img id="brand-banner-img" src="" alt="Banner" class="w-full h-auto object-cover max-h-[300px]">
+            </div>
+        </div>
+
+        <!-- 店舗グリッド -->
         <div id="grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
     </div>
 
     <script>
-        const gasUrl = "https://script.google.com/macros/s/AKfycbzPVVd8fz_ncmEvOXjwEgCke13YjDxUlRC7NmDpXyh2olrps1qXGk68mNA-TnVWcgfkng/exec";
-        let raw = {};
+        const gasUrl = "https://script.google.com/macros/s/AKfycbzXng7GJsQpaYwZXUefcPtYPcjiG3sgzC18cu_jTVnC2CfnVfI18fwiae35UW2bLahi-w/exec";
+        let raw = { dateInfo: {}, stores: [] };
         let currentType = 'all';
+        let currentSv = 'all';
+
+        const brandBanners = {
+            'L': 'https://tmiyawaki-beep.github.io/kiwi-eyebrow-dashboard/30.png'
+        };
 
         async function init() {
-            const res = await fetch(gasUrl);
-            raw = await res.json();
-            document.getElementById('ym').innerText = raw.dateInfo.yearMonth;
-            document.getElementById('today').innerText = raw.dateInfo.today;
-            const remains = Number(raw.dateInfo.endDay) - Number(raw.dateInfo.today);
-            document.getElementById('remaining').innerText = `残り ${remains}日`;
+            try {
+                const res = await fetch(gasUrl);
+                raw = await res.json();
+                
+                document.getElementById('ym').innerText = raw.dateInfo.yearMonth;
+                document.getElementById('today').innerText = raw.dateInfo.today;
+                const remains = Math.max(0, Number(raw.dateInfo.endDay) - Number(raw.dateInfo.today));
+                document.getElementById('remaining').innerText = `残り ${remains}日`;
+                
+                // SVリスト生成
+                const svList = [...new Set(raw.stores.slice(9).map(s => s.svName).filter(n => n && n !== 0))];
+                const svContainer = document.getElementById('sv-buttons');
+                svList.forEach(name => {
+                    const btn = document.createElement('button');
+                    btn.innerText = name;
+                    btn.className = "sv-filter-btn px-5 py-2 rounded-xl text-xs font-black transition-all text-slate-500 bg-slate-100 hover:bg-slate-200";
+                    btn.onclick = () => updateSvFilter(name);
+                    svContainer.appendChild(btn);
+                });
+
+                document.getElementById('loader').classList.add('hidden');
+                apply();
+            } catch (e) {
+                console.error(e);
+                document.getElementById('loader').innerHTML = `<p class="text-red-500 font-bold p-8 text-center">データの読み込みに失敗しました。</p>`;
+            }
+        }
+
+        function updateTypeFilter(type) {
+            currentType = type;
+            document.querySelectorAll('.type-filter-btn').forEach(b => {
+                const isActive = (type === 'all' && b.innerText === '全て') || (type === b.innerText);
+                b.className = isActive ? "type-filter-btn px-6 py-2 rounded-xl text-xs font-black uppercase transition-all bg-white shadow-sm text-blue-600 active" : "type-filter-btn px-6 py-2 rounded-xl text-xs font-black uppercase transition-all text-slate-500 hover:text-slate-800";
+            });
             apply();
         }
 
-        function updateFilter(type) {
-            currentType = type;
-            document.querySelectorAll('.filter-btn').forEach(b => {
-                const isActive = b.innerText === (type==='all'?'全て':type);
-                b.className = isActive ? "filter-btn px-6 py-2 rounded-lg text-xs font-black transition-all bg-white shadow-sm text-blue-600 active" : "filter-btn px-6 py-2 rounded-lg text-xs font-black transition-all text-slate-500";
+        function updateSvFilter(sv) {
+            currentSv = sv;
+            document.querySelectorAll('.sv-filter-btn').forEach(b => {
+                const isActive = (sv === 'all' && b.innerText === '全店舗') || (sv === b.innerText);
+                b.className = isActive ? "sv-filter-btn px-5 py-2 rounded-xl text-xs font-black transition-all active" : "sv-filter-btn px-5 py-2 rounded-xl text-xs font-black transition-all text-slate-500 bg-slate-100 hover:bg-slate-200";
             });
             apply();
         }
 
         function apply() {
+            if (!raw || !raw.stores || raw.stores.length === 0) return;
             const brand = document.getElementById('brand-select').value;
             const sort = document.getElementById('sort-select').value;
-            let summaryKey = "全体";
-            if (currentType !== 'all') summaryKey = currentType;
-            if (brand !== 'all') summaryKey = brand + (currentType === 'all' ? '全体' : currentType);
-            const summaryRow = raw.stores.find(s => s.name.includes(summaryKey)) || raw.stores[0];
-            
-            document.getElementById('summary-title').innerText = `${summaryKey} 進捗着地見込`;
-            document.getElementById('overall-rate').innerText = Math.round(summaryRow.kgiForecast * 100) + "%";
-            document.getElementById('overall-val').innerText = `目標: ¥${summaryRow.kgiGoal.toLocaleString()} / 実績: ¥${summaryRow.kgiActual.toLocaleString()}`;
-            document.getElementById('sum-new').innerText = Math.round(summaryRow.newGuestForecast * 100) + "%";
-            document.getElementById('sum-rep').innerText = Math.round(summaryRow.repeatForecast * 100) + "%";
 
-            let list = raw.stores.slice(9).filter(s => s.name);
+            const banner = document.getElementById('brand-banner-container');
+            if (brandBanners[brand]) {
+                document.getElementById('brand-banner-img').src = brandBanners[brand];
+                banner.classList.remove('hidden');
+            } else { banner.classList.add('hidden'); }
+
+            let list = raw.stores.slice(9).filter(s => s.name && s.name.length > 2);
             if (currentType !== 'all') list = list.filter(s => s.category_label === currentType);
             if (brand !== 'all') list = list.filter(s => s.name.startsWith(brand));
+            if (currentSv !== 'all') list = list.filter(s => s.svName === currentSv);
+
+            // メインサマリー集計
+            if (currentSv !== 'all') {
+                // 直営:C,D / 加盟:AB,AC を使用
+                const goal = list.reduce((sum, s) => sum + (s.category_label === '直営' ? (Number(s.kgiGoal) || 0) : (Number(s.svGoal) || 0)), 0);
+                const actual = list.reduce((sum, s) => sum + (s.category_label === '直営' ? (Number(s.kgiActual) || 0) : (Number(s.svActual) || 0)), 0);
+                const rate = goal > 0 ? Math.round((actual / goal) * 100) : 0;
+                
+                document.getElementById('summary-title').innerText = `${currentSv} SV 担当合計`;
+                document.getElementById('overall-rate').innerText = rate + "%";
+                document.getElementById('overall-val').innerHTML = `<span>目標: ¥${Math.round(goal).toLocaleString()}</span><span class="ml-4">実績: ¥${Math.round(actual).toLocaleString()}</span>`;
+                
+                const nG = list.reduce((sum, s) => sum + (Number(s.newGuestGoal) || 0), 0);
+                const nA = list.reduce((sum, s) => sum + (Number(s.newGuestActual) || 0), 0);
+                const rG = list.reduce((sum, s) => sum + (Number(s.repeatGoal) || 0), 0);
+                const rA = list.reduce((sum, s) => sum + (Number(s.repeatActual) || 0), 0);
+                updateSummaryKPI(nG, nA, rG, rA);
+            } else {
+                let sKey = "全体";
+                if (currentType !== 'all') sKey = currentType;
+                if (brand !== 'all') sKey = brand + (currentType === 'all' ? '全体' : currentType);
+                const sRow = raw.stores.find(s => s.name === sKey) || raw.stores[0];
+                
+                document.getElementById('summary-title').innerText = `${sKey} 進捗着地見込`;
+                document.getElementById('overall-rate').innerText = Math.round((sRow.kgiForecast || 0) * 100) + "%";
+                document.getElementById('overall-val').innerHTML = `<span>目標: ¥${Math.round(sRow.kgiGoal || 0).toLocaleString()}</span><span class="ml-4">実績: ¥${Math.round(sRow.kgiActual || 0).toLocaleString()}</span>`;
+                updateSummaryKPI(sRow.newGuestGoal, sRow.newGuestActual, sRow.repeatGoal, sRow.repeatActual);
+            }
 
             if (sort === 'rate-desc' || sort === 'rate-asc') {
                 list.sort((a,b) => {
@@ -125,66 +246,95 @@
                     const rB = b.category_label === '直営' ? b.kgiForecast : b.svForecast;
                     return sort === 'rate-desc' ? rB - rA : rA - rB;
                 });
-            } else if (sort === 'unit-desc') {
-                list.sort((a,b) => b.unitPriceActual - a.unitPriceActual);
             }
             render(list);
+        }
+
+        function updateSummaryKPI(nG, nA, rG, rA) {
+            const nR = nG > 0 ? Math.round((nA / nG) * 100) : 0;
+            const rR = rG > 0 ? Math.round((rA / rG) * 100) : 0;
+            document.getElementById('sum-new-rate').innerText = nR + "%";
+            document.getElementById('sum-new-val').innerText = `実績: ${Math.round(nA).toLocaleString()}人 / 目標: ${Math.round(nG).toLocaleString()}人`;
+            document.getElementById('sum-rep-rate').innerText = rR + "%";
+            document.getElementById('sum-rep-val').innerText = `実績: ${Math.round(rA).toLocaleString()}人 / 目標: ${Math.round(rG).toLocaleString()}人`;
         }
 
         function render(stores) {
             const grid = document.getElementById('grid');
             grid.innerHTML = "";
             stores.forEach(s => {
-                const isChokuei = s.category_label === '直営';
-                const forecast = isChokuei ? s.kgiForecast : s.svForecast;
-                const rate = Math.round(forecast * 100);
+                const isD = s.category_label === '直営';
+                const rate = Math.round((isD ? s.kgiForecast : s.svForecast) * 100);
                 const brand = s.name.startsWith('m') ? 'most' : s.name.startsWith('S') ? 'ssin' : 'lumiss';
+                const sideSales = (Number(s.productSales) || 0) + (Number(s.ticketSales) || 0);
+
+                const nDiff = (Number(s.newGuestActual) || 0) - (Number(s.newGuestGoal) || 0);
+                const rDiff = (Number(s.repeatActual) || 0) - (Number(s.repeatGoal) || 0);
+                const uDiff = Math.round(Number(s.unitPriceDiff) || 0);
+
                 const card = document.createElement('div');
-                card.className = `bg-white rounded-[2rem] p-6 card-shadow border-t-8 border-${brand} relative overflow-hidden ${rate < 80 ? 'bg-red-50' : ''}`;
+                card.className = `bg-white rounded-[2.5rem] p-6 card-shadow border-t-8 border-${brand} relative transition-all hover:scale-[1.01] ${rate < 80 ? 'bg-red-50/50' : ''} fade-in`;
                 
                 card.innerHTML = `
                     <div class="flex justify-between items-start mb-6">
-                        <div class="flex items-center gap-2">
-                            <span class="w-8 h-8 rounded-full bg-${brand} text-white flex items-center justify-center font-black text-[10px]">${s.name.charAt(0)}</span>
-                            <h3 class="font-black text-slate-800 tracking-tighter">${s.name} ${rate >= 100 ? '⭐' : ''}</h3>
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-${brand} text-white flex items-center justify-center font-black text-[10px] shadow-sm uppercase">${s.name.charAt(0)}</div>
+                            <div>
+                                <h3 class="font-black text-slate-800 tracking-tighter leading-none">${s.name} ${rate >= 100 ? '⭐' : ''}</h3>
+                                <p class="text-[9px] font-bold text-slate-400 mt-1 uppercase tracking-widest leading-none">${s.svName || '担当未設定'}</p>
+                            </div>
                         </div>
                         <div class="text-right">
-                            <p class="text-[9px] font-black text-slate-400 uppercase tracking-tighter">${isChokuei ? 'KGI見込' : 'SV売上見込'}</p>
-                            <p class="text-2xl font-black italic ${rate < 80 ? 'text-red-600' : 'text-slate-900'}">${rate}%</p>
+                            <p class="text-[9px] font-black text-slate-400 uppercase tracking-tighter leading-none">${isD ? '売上見込' : 'SV売上見込'}</p>
+                            <p class="text-3xl font-black italic tracking-tighter ${rate < 80 ? 'text-red-600' : 'text-slate-900'}">${rate}%</p>
                         </div>
                     </div>
-
                     <div class="space-y-3">
-                        <div class="bg-gray-50 rounded-2xl p-3">
-                            <p class="text-[8px] font-black text-slate-400 mb-1 uppercase">売上 (目標 / 実績 / 見込)</p>
-                            <p class="text-xs font-bold text-slate-700">¥${s.kgiGoal.toLocaleString()} / ¥${s.kgiActual.toLocaleString()} / ${Math.round(s.kgiForecast*100)}%</p>
-                        </div>
-                        <div class="grid grid-cols-2 gap-2">
-                            <div class="bg-gray-50 rounded-2xl p-3 text-center">
-                                <p class="text-[8px] font-black text-slate-400 uppercase">新規客数</p>
-                                <p class="text-xs font-bold">${s.newGuestActual}人 / ${Math.round(s.newGuestForecast*100)}%</p>
+                        <div class="bg-slate-50 rounded-2xl p-4 border border-slate-100 shadow-inner">
+                            <div class="flex justify-between items-end mb-1 leading-none">
+                                <p class="text-[8px] font-black text-slate-400 uppercase tracking-tighter">売上実績 / 達成率</p>
+                                <p class="text-[10px] font-black text-slate-400">${Math.round((isD ? s.kgiForecast : s.svForecast)*100)}%</p>
                             </div>
-                            <div class="bg-gray-50 rounded-2xl p-3 text-center">
-                                <p class="text-[8px] font-black text-slate-400 uppercase">再来客数</p>
-                                <p class="text-xs font-bold">${s.repeatActual}人 / ${Math.round(s.repeatForecast*100)}%</p>
+                            <p class="text-sm font-black text-slate-700 tracking-tight leading-none">¥${Math.round(isD ? s.kgiActual : s.svActual).toLocaleString()}</p>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="bg-slate-50 rounded-2xl p-3 border border-slate-100 shadow-inner">
+                                <p class="text-[8px] font-black text-slate-400 mb-1 uppercase leading-none">新規客数</p>
+                                <div class="flex items-baseline justify-between">
+                                    <p class="text-sm font-black text-slate-700 leading-none">${s.newGuestActual}人</p>
+                                    <span class="text-[10px] ${nDiff >= 0 ? 'diff-pos' : 'diff-neg'}">${nDiff >= 0 ? '+' : ''}${nDiff}</span>
+                                </div>
+                            </div>
+                            <div class="bg-slate-50 rounded-2xl p-3 border border-slate-100 shadow-inner">
+                                <p class="text-[8px] font-black text-slate-400 mb-1 uppercase leading-none">再来客数</p>
+                                <div class="flex items-baseline justify-between">
+                                    <p class="text-sm font-black text-slate-700 leading-none">${s.repeatActual}人</p>
+                                    <span class="text-[10px] ${rDiff >= 0 ? 'diff-pos' : 'diff-neg'}">${rDiff >= 0 ? '+' : ''}${rDiff}</span>
+                                </div>
                             </div>
                         </div>
-                        <div class="bg-gray-50 rounded-2xl p-3 flex justify-between items-center">
-                            <span class="text-[8px] font-black text-slate-400 uppercase">客単価 / 差分</span>
-                            <span class="text-xs font-bold text-slate-700">¥${s.unitPriceActual.toLocaleString()} <span class="text-[10px] font-medium">(差: ¥${s.unitPriceDiff.toLocaleString()})</span></span>
+
+                        <div class="bg-indigo-50/30 rounded-2xl p-4 border border-indigo-100/50">
+                            <div class="flex justify-between items-center mb-2 leading-none">
+                                <p class="text-[8px] font-black text-indigo-500 uppercase tracking-tighter">物販・回数券 合計</p>
+                                <p class="text-xs font-black text-indigo-600 italic">¥${Math.round(sideSales).toLocaleString()}</p>
+                            </div>
+                            <div class="grid grid-cols-3 gap-1 text-[9px] font-bold text-slate-500">
+                                <div class="flex flex-col"><span class="text-[7px] text-slate-400 uppercase leading-none mb-0.5">物販</span><span>¥${Math.round(s.productSales || 0).toLocaleString()}</span></div>
+                                <div class="flex flex-col"><span class="text-[7px] text-slate-400 uppercase leading-none mb-0.5">回数券</span><span>¥${Math.round(s.ticketSales || 0).toLocaleString()}</span></div>
+                                <div class="flex flex-col text-right"><span class="text-[7px] text-slate-400 uppercase leading-none mb-0.5">枚数</span><span>${s.ticketCount || 0}枚</span></div>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-50 rounded-2xl p-3 flex justify-between px-4 border border-slate-100 items-center shadow-inner">
+                            <span class="text-[8px] font-black text-slate-400 uppercase tracking-tighter leading-none">客単価 実績</span>
+                            <div class="flex items-center gap-2">
+                                <span class="text-[10px] ${uDiff >= 0 ? 'diff-pos' : 'diff-neg'} leading-none">${uDiff >= 0 ? '+' : ''}${uDiff.toLocaleString()}</span>
+                                <span class="text-sm font-black text-slate-700 italic leading-none">¥${Math.round(s.unitPriceActual).toLocaleString()}</span>
+                            </div>
                         </div>
                     </div>
-                    
-                    ${!isChokuei ? `
-                    <div class="mt-4 pt-4 border-t border-dashed border-slate-200">
-                        <p class="text-[8px] font-black text-indigo-500 uppercase mb-2">パートナー指標 (実績 / 見込)</p>
-                        <div class="grid grid-cols-1 gap-1 text-[10px] font-bold text-slate-600">
-                            <div class="flex justify-between"><span>コンサル料:</span> <span>¥${s.consultActual.toLocaleString()} (${Math.round(s.consultForecast*100)}%)</span></div>
-                            <div class="flex justify-between"><span>卸売上:</span> <span>¥${s.wholesaleActual.toLocaleString()} (${Math.round(s.wholesaleForecast*100)}%)</span></div>
-                            <div class="flex justify-between"><span>SV売上:</span> <span>¥${s.svActual.toLocaleString()} (${Math.round(s.svForecast*100)}%)</span></div>
-                        </div>
-                    </div>
-                    ` : ''}
                 `;
                 grid.appendChild(card);
             });
