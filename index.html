@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KIWI 眉毛事業部 | 経営コンソール</title>
+    <title>Kiwi 眉毛事業部 | 経営コンソール</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -29,21 +29,23 @@
             display: flex; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(255,255,255,0.95); z-index: 1000;
             justify-content: center; align-items: center; flex-direction: column;
+            text-align: center; padding: 20px;
         }
         .logo-container img { max-height: 48px; width: auto; object-fit: contain; }
         .fade-in { animation: fadeIn 0.4s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         
         .sv-filter-btn.active { @apply bg-white shadow-md text-blue-600 ring-2 ring-blue-500/20; }
-        .diff-pos { color: #10b981; font-weight: 800; } /* 正の差分: 緑 */
-        .diff-neg { color: #ef4444; font-weight: 800; } /* 負の差分: 赤 */
+        .diff-pos { color: #10b981; font-weight: 800; } 
+        .diff-neg { color: #ef4444; font-weight: 800; } 
     </style>
 </head>
 <body class="bg-slate-50 text-slate-900 pb-20">
 
     <div id="loader" class="loading-overlay">
-        <div class="animate-spin text-5xl text-blue-600 mb-4"><i class="fas fa-circle-notch"></i></div>
-        <p class="font-black text-slate-500 tracking-widest uppercase text-xs">データを同期中...</p>
+        <div class="animate-spin text-5xl text-blue-600 mb-6"><i class="fas fa-circle-notch"></i></div>
+        <p id="loader-text" class="font-black text-slate-500 tracking-widest uppercase text-sm italic mb-2">Syncing Data...</p>
+        <p id="loader-subtext" class="text-blue-600 font-bold text-lg animate-pulse"></p>
     </div>
 
     <div class="max-w-7xl mx-auto p-4 md:p-6">
@@ -55,8 +57,8 @@
                 </div>
                 <div>
                     <p class="text-[10px] font-black tracking-[0.3em] text-slate-400 uppercase leading-none mb-1 text-center md:text-left">株式会社Kiwi 眉毛事業部</p>
-                    <h1 class="text-3xl md:text-4xl font-black italic tracking-tighter text-slate-900 uppercase leading-none">KIWI 眉毛事業部</h1>
-                    <p class="text-[10px] font-bold text-slate-500 mt-2 uppercase tracking-widest italic tracking-tighter">Business Intelligence Console | 事業部全店分析・着地予測</p>
+                    <h1 class="text-3xl md:text-4xl font-black italic tracking-tighter text-slate-900 uppercase leading-none">Kiwi 眉毛事業部</h1>
+                    <p class="text-[10px] font-bold text-slate-500 mt-2 uppercase tracking-widest italic tracking-tighter">Sales Chaser Yuki | 事業部全店分析・着地予測</p>
                 </div>
             </div>
             <div class="flex flex-col items-end gap-2 bg-white px-6 py-3 rounded-2xl shadow-sm border border-slate-100">
@@ -74,7 +76,7 @@
                 <p id="summary-title" class="text-[10px] font-black tracking-[0.2em] text-slate-400 uppercase mb-2 text-center">事業部全体 進捗着地見込</p>
                 <div id="overall-rate" class="text-8xl font-black italic text-slate-900 tracking-tighter">--%</div>
                 <div id="overall-val" class="text-[11px] font-bold text-slate-400 mt-3 flex gap-4 text-center">データを同期しています...</div>
-                <div class="absolute -right-6 -bottom-6 text-slate-100 opacity-20 text-9xl font-black italic pointer-events-none uppercase">KIWI</div>
+                <div class="absolute -right-6 -bottom-6 text-slate-100 opacity-20 text-9xl font-black italic pointer-events-none uppercase">Kiwi</div>
             </div>
             <div class="grid grid-cols-2 md:grid-cols-1 gap-4 md:col-span-2">
                 <div class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm flex items-center gap-5">
@@ -149,7 +151,23 @@
             'L': 'https://tmiyawaki-beep.github.io/kiwi-eyebrow-dashboard/30.png'
         };
 
+        // 事業部コアバリューメッセージ
+        const loadingMessages = [
+            "Open - ありのままを曝け出せ",
+            "Open - 貪欲に吸収しろ",
+            "Professional - 期待を超えろ",
+            "Professional - まず自分から行動で示せ",
+            "Top Speed - 最短ルートで進めろ",
+            "Top Speed - 失敗を恐れず挑戦しろ",
+            "One team - Limeを自分ごととして捉えろ",
+            "One team - 仲間の人生と向き合え"
+        ];
+
         async function init() {
+            // ローディングメッセージをランダムにセット
+            const loaderSubtext = document.getElementById('loader-subtext');
+            loaderSubtext.innerText = loadingMessages[Math.floor(Math.random() * loadingMessages.length)];
+
             try {
                 const res = await fetch(gasUrl);
                 raw = await res.json();
@@ -211,7 +229,7 @@
             if (brand !== 'all') list = list.filter(s => s.name.startsWith(brand));
             if (currentSv !== 'all') list = list.filter(s => s.svName === currentSv);
 
-            // メインサマリー集計
+            // サマリー集計
             if (currentSv !== 'all') {
                 const goal = list.reduce((sum, s) => sum + (s.category_label === '直営' ? (Number(s.kgiGoal) || 0) : (Number(s.svGoal) || 0)), 0);
                 const actual = list.reduce((sum, s) => sum + (s.category_label === '直営' ? (Number(s.kgiActual) || 0) : (Number(s.svActual) || 0)), 0);
@@ -264,15 +282,10 @@
             grid.innerHTML = "";
             stores.forEach(s => {
                 const isD = s.category_label === '直営';
-                
-                // カード右上の大きな数字：着地見込 (E列 または AD列)
                 const landingForecast = Math.round((isD ? s.kgiForecast : s.svForecast) * 100);
-                
-                // 売上実績セクション内の達成率：今現在の達成率（実績 / 目標）
                 const goal = isD ? (Number(s.kgiGoal) || 0) : (Number(s.svGoal) || 0);
                 const actual = isD ? (Number(s.kgiActual) || 0) : (Number(s.svActual) || 0);
                 const currentAchievementRate = goal > 0 ? Math.round((actual / goal) * 100) : 0;
-                
                 const brand = s.name.startsWith('m') ? 'most' : s.name.startsWith('S') ? 'ssin' : 'lumiss';
                 const sideSales = (Number(s.productSales) || 0) + (Number(s.ticketSales) || 0);
 
