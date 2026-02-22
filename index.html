@@ -10,6 +10,7 @@
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap');
         body { font-family: 'Noto Sans JP', sans-serif; }
         
+        /* ブランドカラー定義 */
         .bg-most { background-color: #5d4037; } 
         .bg-ssin { background-color: #1e3a8a; } 
         .bg-lumiss { background: linear-gradient(135deg, #e2e8f0 0%, #94a3b8 100%); } 
@@ -25,27 +26,36 @@
         .card-shadow { box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); }
         .filter-btn.active { @apply bg-white shadow-md text-blue-600 ring-2 ring-blue-500/20; }
         
+        /* ローディングオーバーレイ */
         .loading-overlay {
             display: flex; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(255,255,255,0.95); z-index: 1000;
             justify-content: center; align-items: center; flex-direction: column;
             text-align: center; padding: 20px;
         }
+        
         .logo-container img { max-height: 48px; width: auto; object-fit: contain; }
+        
+        /* アニメーション */
         .fade-in { animation: fadeIn 0.4s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         
         .sv-filter-btn.active { @apply bg-white shadow-md text-blue-600 ring-2 ring-blue-500/20; }
         .diff-pos { color: #10b981; font-weight: 800; } 
         .diff-neg { color: #ef4444; font-weight: 800; } 
+
+        /* 数値情報の密度調整 */
+        .metric-label { @apply text-[7px] font-black text-slate-400 uppercase tracking-tighter leading-none mb-0.5; }
+        .metric-value { @apply text-[10px] font-black text-slate-700 leading-none; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-900 pb-20">
 
+    <!-- ローディング画面 -->
     <div id="loader" class="loading-overlay">
         <div class="animate-spin text-5xl text-blue-600 mb-6"><i class="fas fa-circle-notch"></i></div>
         <p id="loader-text" class="font-black text-slate-500 tracking-widest uppercase text-sm italic mb-2">Syncing Data...</p>
-        <p id="loader-subtext" class="text-blue-600 font-bold text-lg animate-pulse"></p>
+        <p id="loader-subtext" class="text-blue-600 font-bold text-lg animate-pulse px-4"></p>
     </div>
 
     <div class="max-w-7xl mx-auto p-4 md:p-6">
@@ -70,22 +80,22 @@
             </div>
         </header>
 
-        <!-- メイン集計サマリー -->
-        <div id="summary-section" class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <!-- メインサマリー -->
+        <div id="summary-section" class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8 text-center md:text-left">
             <div class="md:col-span-2 bg-white p-8 rounded-[2.5rem] card-shadow border border-slate-100 flex flex-col justify-center items-center relative overflow-hidden">
-                <p id="summary-title" class="text-[10px] font-black tracking-[0.2em] text-slate-400 uppercase mb-2 text-center">事業部全体 進捗着地見込</p>
+                <p id="summary-title" class="text-[10px] font-black tracking-[0.2em] text-slate-400 uppercase mb-2">事業部全体 進捗着地見込</p>
                 <div id="overall-rate" class="text-8xl font-black italic text-slate-900 tracking-tighter">--%</div>
-                <div id="overall-val" class="text-[11px] font-bold text-slate-400 mt-3 flex gap-4 text-center">データを同期しています...</div>
-                <div class="absolute -right-6 -bottom-6 text-slate-100 opacity-20 text-9xl font-black italic pointer-events-none uppercase">Kiwi</div>
+                <div id="overall-val" class="text-[11px] font-bold text-slate-400 mt-3 flex gap-4">データを同期しています...</div>
+                <div class="absolute -right-6 -bottom-6 text-slate-100 opacity-20 text-9xl font-black italic pointer-events-none uppercase leading-none">Kiwi</div>
             </div>
-            <div class="grid grid-cols-2 md:grid-cols-1 gap-4 md:col-span-2">
+            <div class="grid grid-cols-2 md:grid-cols-1 gap-4 md:col-span-2 text-left">
                 <div class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm flex items-center gap-5">
                     <div class="w-12 h-12 rounded-2xl bg-orange-50 text-orange-500 flex items-center justify-center text-xl shadow-inner"><i class="fas fa-users"></i></div>
                     <div class="flex-1 overflow-hidden">
                         <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">新規客数 着地見込</p>
                         <div class="flex items-baseline justify-between">
                             <p id="sum-new-rate" class="text-xl font-black tracking-tighter leading-none">--%</p>
-                            <p id="sum-new-val" class="text-[9px] font-bold text-slate-400 tracking-tighter truncate">実績: -- / 目標: --</p>
+                            <p id="sum-new-val" class="text-[9px] font-bold text-slate-400 tracking-tighter truncate ml-2">実績: -- / 目標: --</p>
                         </div>
                     </div>
                 </div>
@@ -95,14 +105,14 @@
                         <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">再来客数 着地見込</p>
                         <div class="flex items-baseline justify-between">
                             <p id="sum-rep-rate" class="text-xl font-black tracking-tighter leading-none">--%</p>
-                            <p id="sum-rep-val" class="text-[9px] font-bold text-slate-400 tracking-tighter truncate">実績: -- / 目標: --</p>
+                            <p id="sum-rep-val" class="text-[9px] font-bold text-slate-400 tracking-tighter truncate ml-2">実績: -- / 目標: --</p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- コントロール -->
+        <!-- フィルタ -->
         <div class="flex flex-wrap gap-4 mb-4 items-center bg-white p-4 rounded-3xl shadow-sm border border-slate-100">
             <div class="flex gap-2 p-1 bg-slate-100 rounded-2xl">
                 <button onclick="updateTypeFilter('all')" class="type-filter-btn px-6 py-2 rounded-xl text-xs font-black uppercase transition-all active bg-white shadow-sm text-blue-600">全て</button>
@@ -122,7 +132,7 @@
             </select>
         </div>
 
-        <!-- SVフィルタボタン -->
+        <!-- SVフィルタ -->
         <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-100 mb-8 overflow-hidden">
             <p class="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3 ml-2 italic leading-none">SV担当別フィルタ・売上分析</p>
             <div id="sv-buttons" class="flex flex-wrap gap-2">
@@ -130,19 +140,18 @@
             </div>
         </div>
 
-        <!-- バナーエリア -->
         <div id="brand-banner-container" class="hidden mb-10 fade-in">
             <div class="w-full bg-white rounded-[2.5rem] card-shadow overflow-hidden border border-slate-100">
                 <img id="brand-banner-img" src="" alt="Banner" class="w-full h-auto object-cover max-h-[300px]">
             </div>
         </div>
 
-        <!-- 店舗グリッド -->
+        <!-- 店舗一覧 -->
         <div id="grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
     </div>
 
     <script>
-        const gasUrl = "https://script.google.com/macros/s/AKfycby2s7Btnu2ijSYeqG6cxhUmcwHNiu3ir2jzzyheZ67jGH5QXrApNTgTp-SYuMBnzKuxKQ/exec";
+        const gasUrl = "https://script.google.com/macros/s/AKfycby6RkVcKP2wz_tkgp-b_ZetKF4zpcwUU2PASABQWxJrMxw920m-QaNr0frN8yFrxThr1A/exec";
         let raw = { dateInfo: {}, stores: [] };
         let currentType = 'all';
         let currentSv = 'all';
@@ -151,8 +160,7 @@
             'L': 'https://tmiyawaki-beep.github.io/kiwi-eyebrow-dashboard/30.png'
         };
 
-        // 事業部コアバリューメッセージ
-        const loadingMessages = [
+        const coreValues = [
             "Open - ありのままを曝け出せ",
             "Open - 貪欲に吸収しろ",
             "Professional - 期待を超えろ",
@@ -164,9 +172,8 @@
         ];
 
         async function init() {
-            // ローディングメッセージをランダムにセット
-            const loaderSubtext = document.getElementById('loader-subtext');
-            loaderSubtext.innerText = loadingMessages[Math.floor(Math.random() * loadingMessages.length)];
+            const subtext = document.getElementById('loader-subtext');
+            subtext.innerText = coreValues[Math.floor(Math.random() * coreValues.length)];
 
             try {
                 const res = await fetch(gasUrl);
@@ -191,7 +198,7 @@
                 apply();
             } catch (e) {
                 console.error(e);
-                document.getElementById('loader').innerHTML = `<p class="text-red-500 font-bold p-8 text-center">データの読み込みに失敗しました。</p>`;
+                document.getElementById('loader').innerHTML = `<p class="text-red-500 font-bold p-8 text-center">読み込みに失敗しました。GASのデプロイを確認してください。</p>`;
             }
         }
 
@@ -229,7 +236,7 @@
             if (brand !== 'all') list = list.filter(s => s.name.startsWith(brand));
             if (currentSv !== 'all') list = list.filter(s => s.svName === currentSv);
 
-            // サマリー集計
+            // メインサマリー集計
             if (currentSv !== 'all') {
                 const goal = list.reduce((sum, s) => sum + (s.category_label === '直営' ? (Number(s.kgiGoal) || 0) : (Number(s.svGoal) || 0)), 0);
                 const actual = list.reduce((sum, s) => sum + (s.category_label === '直営' ? (Number(s.kgiActual) || 0) : (Number(s.svActual) || 0)), 0);
@@ -244,9 +251,9 @@
                 const rG = list.reduce((sum, s) => sum + (Number(s.repeatGoal) || 0), 0);
                 const rA = list.reduce((sum, s) => sum + (Number(s.repeatActual) || 0), 0);
                 
-                const nRate = nG > 0 ? Math.round((nA / nG) * 100) : 0;
-                const rRate = rG > 0 ? Math.round((rA / rG) * 100) : 0;
-                updateSummaryKPI(nG, nA, rG, rA, nRate / 100, rRate / 100);
+                const nR = nG > 0 ? nA / nG : 0;
+                const rR = rG > 0 ? rA / rG : 0;
+                updateSummaryKPI(nG, nA, rG, rA, nR, rR);
             } else {
                 let sKey = "全体";
                 if (currentType !== 'all') sKey = currentType;
@@ -256,7 +263,6 @@
                 document.getElementById('summary-title').innerText = `${sKey} 進捗着地見込`;
                 document.getElementById('overall-rate').innerText = Math.round((sRow.kgiForecast || 0) * 100) + "%";
                 document.getElementById('overall-val').innerHTML = `<span>目標: ¥${Math.round(sRow.kgiGoal || 0).toLocaleString()}</span><span class="ml-4">実績: ¥${Math.round(sRow.kgiActual || 0).toLocaleString()}</span>`;
-                
                 updateSummaryKPI(sRow.newGuestGoal, sRow.newGuestActual, sRow.repeatGoal, sRow.repeatActual, sRow.newGuestForecast, sRow.repeatForecast);
             }
 
@@ -270,10 +276,10 @@
             render(list);
         }
 
-        function updateSummaryKPI(nG, nA, rG, rA, nForecast, rForecast) {
-            document.getElementById('sum-new-rate').innerText = Math.round((nForecast || 0) * 100) + "%";
+        function updateSummaryKPI(nG, nA, rG, rA, nF, rF) {
+            document.getElementById('sum-new-rate').innerText = Math.round((nF || 0) * 100) + "%";
             document.getElementById('sum-new-val').innerText = `実績: ${Math.round(nA).toLocaleString()}人 / 目標: ${Math.round(nG).toLocaleString()}人`;
-            document.getElementById('sum-rep-rate').innerText = Math.round((rForecast || 0) * 100) + "%";
+            document.getElementById('sum-rep-rate').innerText = Math.round((rF || 0) * 100) + "%";
             document.getElementById('sum-rep-val').innerText = `実績: ${Math.round(rA).toLocaleString()}人 / 目標: ${Math.round(rG).toLocaleString()}人`;
         }
 
@@ -282,77 +288,122 @@
             grid.innerHTML = "";
             stores.forEach(s => {
                 const isD = s.category_label === '直営';
-                const landingForecast = Math.round((isD ? s.kgiForecast : s.svForecast) * 100);
-                const goal = isD ? (Number(s.kgiGoal) || 0) : (Number(s.svGoal) || 0);
+                const forecast = Math.round((isD ? s.kgiForecast : s.svForecast) * 100);
                 const actual = isD ? (Number(s.kgiActual) || 0) : (Number(s.svActual) || 0);
-                const currentAchievementRate = goal > 0 ? Math.round((actual / goal) * 100) : 0;
+                const goal = isD ? (Number(s.kgiGoal) || 0) : (Number(s.svGoal) || 0);
+                const achievementRate = goal > 0 ? Math.round((actual / goal) * 100) : 0;
+                
                 const brand = s.name.startsWith('m') ? 'most' : s.name.startsWith('S') ? 'ssin' : 'lumiss';
-                const sideSales = (Number(s.productSales) || 0) + (Number(s.ticketSales) || 0);
+                const sideTotal = (Number(s.productSales) || 0) + (Number(s.ticketSales) || 0) + (Number(s.optionSales) || 0);
 
                 const nDiff = (Number(s.newGuestActual) || 0) - (Number(s.newGuestGoal) || 0);
                 const rDiff = (Number(s.repeatActual) || 0) - (Number(s.repeatGoal) || 0);
                 const uDiff = Math.round(Number(s.unitPriceDiff) || 0);
 
                 const card = document.createElement('div');
-                card.className = `bg-white rounded-[2.5rem] p-6 card-shadow border-t-8 border-${brand} relative transition-all hover:scale-[1.01] ${landingForecast < 80 ? 'bg-red-50/50' : ''} fade-in`;
+                card.className = `bg-white rounded-[2.5rem] p-6 card-shadow border-t-8 border-${brand} relative transition-all hover:scale-[1.01] ${forecast < 80 ? 'bg-red-50/50' : ''} fade-in`;
                 
                 card.innerHTML = `
-                    <div class="flex justify-between items-start mb-6">
+                    <div class="flex justify-between items-start mb-4">
                         <div class="flex items-center gap-3">
                             <div class="w-10 h-10 rounded-full bg-${brand} text-white flex items-center justify-center font-black text-[10px] shadow-sm uppercase">${s.name.charAt(0)}</div>
                             <div>
-                                <h3 class="font-black text-slate-800 tracking-tighter leading-none">${s.name} ${landingForecast >= 100 ? '⭐' : ''}</h3>
+                                <h3 class="font-black text-slate-800 tracking-tighter leading-none text-base">${s.name} ${forecast >= 100 ? '⭐' : ''}</h3>
                                 <p class="text-[9px] font-bold text-slate-400 mt-1 uppercase tracking-widest leading-none">${s.svName || '担当未設定'}</p>
                             </div>
                         </div>
                         <div class="text-right">
                             <p class="text-[9px] font-black text-slate-400 uppercase tracking-tighter leading-none">着地見込</p>
-                            <p class="text-3xl font-black italic tracking-tighter ${landingForecast < 80 ? 'text-red-600' : 'text-slate-900'}">${landingForecast}%</p>
+                            <p class="text-3xl font-black italic tracking-tighter ${forecast < 80 ? 'text-red-600' : 'text-slate-900'}">${forecast}%</p>
                         </div>
                     </div>
-                    <div class="space-y-3">
-                        <div class="bg-slate-50 rounded-2xl p-4 border border-slate-100 shadow-inner">
-                            <div class="flex justify-between items-end mb-1 leading-none">
-                                <p class="text-[8px] font-black text-slate-400 uppercase tracking-tighter">売上実績 / 達成率</p>
-                                <p class="text-[10px] font-black text-slate-400">${currentAchievementRate}%</p>
+
+                    <div class="space-y-2">
+                        <!-- 売上・達成率 -->
+                        <div class="bg-slate-50 rounded-2xl p-3 border border-slate-100 shadow-inner flex justify-between items-center">
+                            <div>
+                                <p class="metric-label">売上実績</p>
+                                <p class="text-sm font-black text-slate-700 tracking-tight leading-none">¥${Math.round(actual).toLocaleString()}</p>
                             </div>
-                            <p class="text-sm font-black text-slate-700 tracking-tight leading-none">¥${Math.round(actual).toLocaleString()}</p>
+                            <div class="text-right">
+                                <p class="metric-label">目標達成率</p>
+                                <p class="text-sm font-black text-blue-600 leading-none">${achievementRate}%</p>
+                            </div>
                         </div>
 
-                        <div class="grid grid-cols-2 gap-3">
+                        <!-- 客数 -->
+                        <div class="grid grid-cols-2 gap-2">
                             <div class="bg-slate-50 rounded-2xl p-3 border border-slate-100 shadow-inner">
-                                <p class="text-[8px] font-black text-slate-400 mb-1 uppercase leading-none">新規客数</p>
+                                <p class="metric-label">新規客数</p>
                                 <div class="flex items-baseline justify-between">
-                                    <p class="text-sm font-black text-slate-700 leading-none">${s.newGuestActual}人</p>
+                                    <p class="metric-value">${s.newGuestActual}人</p>
                                     <span class="text-[10px] ${nDiff >= 0 ? 'diff-pos' : 'diff-neg'}">${nDiff >= 0 ? '+' : ''}${nDiff}</span>
                                 </div>
                             </div>
                             <div class="bg-slate-50 rounded-2xl p-3 border border-slate-100 shadow-inner">
-                                <p class="text-[8px] font-black text-slate-400 mb-1 uppercase leading-none">再来客数</p>
+                                <p class="metric-label">再来客数</p>
                                 <div class="flex items-baseline justify-between">
-                                    <p class="text-sm font-black text-slate-700 leading-none">${s.repeatActual}人</p>
+                                    <p class="metric-value">${s.repeatActual}人</p>
                                     <span class="text-[10px] ${rDiff >= 0 ? 'diff-pos' : 'diff-neg'}">${rDiff >= 0 ? '+' : ''}${rDiff}</span>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="bg-indigo-50/30 rounded-2xl p-4 border border-indigo-100/50">
-                            <div class="flex justify-between items-center mb-2 leading-none">
-                                <p class="text-[8px] font-black text-indigo-500 uppercase tracking-tighter">物販・回数券 合計</p>
-                                <p class="text-xs font-black text-indigo-600 italic">¥${Math.round(sideSales).toLocaleString()}</p>
+                        <!-- 単価・次回予約 -->
+                        <div class="grid grid-cols-2 gap-2">
+                            <div class="bg-slate-50 rounded-2xl p-2 px-3 border border-slate-100 shadow-inner">
+                                <p class="metric-label">客単価 実績</p>
+                                <div class="flex items-baseline justify-between">
+                                    <p class="metric-value">¥${Math.round(s.unitPriceActual).toLocaleString()}</p>
+                                    <span class="text-[8px] ${uDiff >= 0 ? 'diff-pos' : 'diff-neg'}">${uDiff >= 0 ? '+' : ''}${uDiff}</span>
+                                </div>
                             </div>
-                            <div class="grid grid-cols-[1fr_1.5fr_1fr] gap-1 text-[9px] font-bold text-slate-500">
-                                <div class="flex flex-col"><span class="text-[7px] text-slate-400 uppercase leading-none mb-0.5">物販</span><span>¥${Math.round(s.productSales || 0).toLocaleString()}</span></div>
-                                <div class="flex flex-col text-right pr-1 border-r border-indigo-100/30"><span class="text-[7px] text-slate-400 uppercase leading-none mb-0.5">回数券</span><span>¥${Math.round(s.ticketSales || 0).toLocaleString()}</span></div>
-                                <div class="flex flex-col text-right pl-1"><span class="text-[7px] text-slate-400 uppercase leading-none mb-0.5">枚数</span><span>${s.ticketCount || 0}枚</span></div>
+                            <div class="bg-slate-50 rounded-2xl p-2 px-3 border border-slate-100 shadow-inner">
+                                <p class="metric-label text-indigo-500">次回予約率</p>
+                                <p class="metric-value text-indigo-600">${Math.round((s.nextReservationRate || 0) * 100)}%</p>
                             </div>
                         </div>
 
-                        <div class="bg-slate-50 rounded-2xl p-3 flex justify-between px-4 border border-slate-100 items-center shadow-inner">
-                            <span class="text-[8px] font-black text-slate-400 uppercase tracking-tighter leading-none">客単価 実績</span>
-                            <div class="flex items-center gap-2">
-                                <span class="text-[10px] ${uDiff >= 0 ? 'diff-pos' : 'diff-neg'} leading-none">${uDiff >= 0 ? '+' : ''}${uDiff.toLocaleString()}</span>
-                                <span class="text-sm font-black text-slate-700 italic leading-none">¥${Math.round(s.unitPriceActual).toLocaleString()}</span>
+                        <!-- 付帯詳細 -->
+                        <div class="bg-indigo-50/30 rounded-2xl p-3 border border-indigo-100/50">
+                            <div class="flex justify-between items-center mb-2 border-b border-indigo-100/30 pb-1">
+                                <p class="text-[8px] font-black text-indigo-500 uppercase tracking-tighter leading-none">付帯合計 (物販+券+OPT)</p>
+                                <p class="text-xs font-black text-indigo-600 italic leading-none">¥${Math.round(sideTotal).toLocaleString()}</p>
+                            </div>
+                            
+                            <div class="grid grid-cols-3 gap-2">
+                                <div>
+                                    <p class="metric-label !text-indigo-400">回数券</p>
+                                    <p class="metric-value !text-[9px]">¥${Math.round(s.ticketSales || 0).toLocaleString()}</p>
+                                    <p class="text-[7px] text-slate-400 text-right">右寄表示</p>
+                                    <p class="text-[7px] text-slate-400 text-right">${s.ticketCount || 0}枚 | ${Math.round((s.ticketSalesRate || 0)*100)}%</p>
+                                </div>
+                                <div>
+                                    <p class="metric-label !text-indigo-400">物販</p>
+                                    <p class="metric-value !text-[9px]">¥${Math.round(s.productSales || 0).toLocaleString()}</p>
+                                    <p class="text-[7px] text-slate-400 text-right">${s.productSalesCount || 0}点 | ${Math.round((s.productSalesRate || 0)*100)}%</p>
+                                </div>
+                                <div>
+                                    <p class="metric-label !text-indigo-400">OPT</p>
+                                    <p class="metric-value !text-[9px]">¥${Math.round(s.optionSales || 0).toLocaleString()}</p>
+                                    <p class="text-[7px] text-slate-400 text-right">${Math.round((s.optionSalesRate || 0)*100)}%</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 単価分析 -->
+                        <div class="flex justify-between px-2 pt-1 border-t border-slate-100">
+                            <div class="text-center">
+                                <p class="metric-label">施術単価</p>
+                                <p class="metric-value">¥${Math.round(s.serviceUnitPrice || 0).toLocaleString()}</p>
+                            </div>
+                            <div class="text-center">
+                                <p class="metric-label">券単価</p>
+                                <p class="metric-value">¥${Math.round(s.ticketUnitPrice || 0).toLocaleString()}</p>
+                            </div>
+                            <div class="text-center">
+                                <p class="metric-label">物販単価</p>
+                                <p class="metric-value">¥${Math.round(s.productUnitPrice || 0).toLocaleString()}</p>
                             </div>
                         </div>
                     </div>
